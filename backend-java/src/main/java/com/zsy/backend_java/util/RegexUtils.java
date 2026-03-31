@@ -7,7 +7,7 @@ public class RegexUtils {
      * @param phone 手机号/Phone number
      * @return 是否合法/Is valid
      */
-    public static boolean isPhoneValid(String phone) {
+    public static boolean isPhoneInValid(String phone) {
         return mismatch(phone, RegexPatterns.PHONE_REGEX);
     }
 
@@ -16,7 +16,7 @@ public class RegexUtils {
      * @param email 邮箱/Email
      * @return 是否合法/Is valid
      */
-    public static boolean isEmailValid(String email) {
+    public static boolean isEmailInvalid(String email) {
         return mismatch(email, RegexPatterns.EMAIL_REGEX);
     }
 
