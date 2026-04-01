@@ -7,13 +7,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zsy.backend_java.dto.LoginFormDTO;
 import com.zsy.backend_java.dto.Result;
+import com.zsy.backend_java.dto.UserDTO;
 import com.zsy.backend_java.service.IUserService;
-import com.zsy.backend_java.util.RegexUtils;
+import com.zsy.backend_java.util.UserHolder;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 
 @Slf4j
@@ -47,36 +50,16 @@ public class UserController {
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session) {
         //TODO: process POST request
         
-        String phone = loginForm.getPhone();
-        Object cacheCode = session.getAttribute("code");
-        String code = loginForm.getCode();
-        String email = loginForm.getEmail();
-        String password = loginForm.getPassword();
-        // ❗ 防止用户乱传（两个都传）
-        if (phone != null && email != null) {
-            return Result.fail("Please provide either phone or email, not both");
-        }
-        // 1. 校验手机号
-        if (phone != null) {
-            if (RegexUtils.isPhoneInValid(phone)) {
-                return Result.fail("Invalid phone number format");
-            }
-        }
-
-        // 2. 校验邮箱
-        if (email != null) {
-            if (RegexUtils.isEmailInvalid(email)) {
-                return Result.fail("Invalid email format");
-            }
-        }
-        // 3. 校验验证码
-        if (cacheCode == null || !cacheCode.toString().equals(code)) {
-            return Result.fail("Invalid verification code");
-        }
-
-        // 3. 符合则登录成功，返回用户信息
         return userService.login(loginForm, session);
     }
+
+
+    @GetMapping("/me")
+    public Result me() {
+        UserDTO user = UserHolder.getUser();
+        return Result.ok(user);
+    }
+    
     
 }
     

@@ -3,6 +3,7 @@ package com.zsy.backend_java.entity;
 import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -40,10 +41,12 @@ public class User {
     /**
      * 昵称/Nickname
      */
+    @TableField("nick_name")
     private String nickname;
     /**
      * 头像/Avatar
      */    
+    @TableField("icon")
     private String avatarUrl = "";
     /**
      * 创建时间/Create time
