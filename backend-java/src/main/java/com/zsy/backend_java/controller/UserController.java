@@ -37,7 +37,7 @@ public class UserController {
     public Result sendCode(@RequestParam("phone") String phone, HttpSession session) {
         // 发送短信验证码并保存验证码
         
-        return userService.sendCode(phone, session);
+        return userService.sendCodePhone(phone, session);
     }
 
     @PostMapping("code/email")
@@ -48,8 +48,7 @@ public class UserController {
     }
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session) {
-        //TODO: process POST request
-        
+
         return userService.login(loginForm, session);
     }
 
@@ -59,7 +58,6 @@ public class UserController {
         UserDTO user = UserHolder.getUser();
         return Result.ok(user);
     }
-    
     
 }
     

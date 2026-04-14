@@ -82,7 +82,15 @@ curl.exe -b cookies.txt -X POST "http://localhost:8081/user/login" ^
   -d "{\"email\":\"example@example.com\",\"code\":\"000000\"}"
 ```
 
-## 7. Important note
+## 7. Check current logged-in user from session
+
+After a successful login, use the same `cookies.txt` file to check the current user:
+
+```powershell
+curl.exe -b cookies.txt "http://localhost:8081/user/me"
+```
+
+## 8. Important note
 
 The verification code is stored in `HttpSession`, so:
 
