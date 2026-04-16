@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.zsy.backend_java.util.LoginInterceptor;
+import com.zsy.backend_java.util.RefreshTokenInterceptor;
 
 import jakarta.annotation.Resource;
 
@@ -16,8 +17,11 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor(stringRedisTemplate))
+        // Login interceptor
+        registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
+                    "/",
+                    "/refresh-token-test.html",
                     "/user/login", 
                     "/user/code", 
                     "/user/code/email",
@@ -26,8 +30,11 @@ public class MvcConfig implements WebMvcConfigurer {
                     "/shop-type/**",
                     "/upload/**",
                     "/voucher/**"
-                );
-
+                ).order(1);
+    // Token regresh interceptor
+    registry
+    .addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+    .addPathPatterns("/**")
+    .order(0);
     }
-
 }

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refresh Token Test</title>
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #f6efe6 0%, #dbe6f6 100%);
+            --panel: rgba(255, 255, 255, 0.88);
+            --border: rgba(24, 37, 56, 0.12);
+            --text: #1d2733;
+            --muted: #5f6c7a;
+            --accent: #0f766e;
+            --accent-strong: #115e59;
+            --shadow: 0 24px 60px rgba(24, 37, 56, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Georgia, "Times New Roman", serif;
+            background: var(--bg);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .shell {
+            width: min(900px, 100%);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .hero {
+            padding: 28px 28px 18px;
+            background:
+                radial-gradient(circle at top right, rgba(15, 118, 110, 0.24), transparent 36%),
+                radial-gradient(circle at left center, rgba(17, 94, 89, 0.12), transparent 28%);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            padding: 0 28px 28px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+
+        input, select, button, textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(24, 37, 56, 0.14);
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        button {
+            margin-top: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: transform 160ms ease, background 160ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            background: var(--accent-strong);
+        }
+
+        button.secondary {
+            background: #1f2937;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--accent-strong);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            margin: 12px 0 0;
+            padding: 14px;
+            background: #16202a;
+            color: #dff7f4;
+            border-radius: 16px;
+            min-height: 180px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .small {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 680px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div class="pill">Browser-side refresh token playground</div>
+            <h1>Refresh Token Test</h1>
+            <p class="subtitle">Send a code, log in, inspect TTL, then call <code>/</code> with the token to verify refresh behavior.</p>
+        </section>
+
+        <section class="grid">
+            <div class="card">
+                <h2>1. Login Setup</h2>
+                <label for="mode">Login mode</label>
+                <select id="mode">
+                    <option value="phone">Phone</option>
+                    <option value="email">Email</option>
+                </select>
+
+                <label for="identifier">Phone or email</label>
+                <input id="identifier" placeholder="612345678 or example@example.com">
+
+                <button id="send-code">Send verification code</button>
+                <p class="small">Check the backend console log for the 6-digit code.</p>
+
+                <label for="code">Verification code</label>
+                <input id="code" placeholder="123456">
+
+                <button id="login">Log in and save token</button>
+
+                <label for="token">Current token</label>
+                <textarea id="token" rows="4" placeholder="Token will appear here after login"></textarea>
+
+                <button class="secondary" id="save-token">Save token manually</button>
+            </div>
+
+            <div class="card">
+                <h2>2. TTL and Refresh</h2>
+                <div class="row">
+                    <button id="ttl-before">Check current TTL</button>
+                    <button id="refresh-root">Call / with token</button>
+                </div>
+
+                <div class="row">
+                    <button id="ttl-after">Check TTL again</button>
+                    <button class="secondary" id="me">Call /user/me</button>
+                </div>
+
+                <p class="small">If refresh works, the TTL after calling <code>/</code> should jump back close to 30 minutes.</p>
+            </div>
+
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>3. Result Log</h2>
+                <pre id="output">Waiting for a request...</pre>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const tokenKey = "refresh-token-test-token";
+        const modeInput = document.getElementById("mode");
+        const identifierInput = document.getElementById("identifier");
+        const codeInput = document.getElementById("code");
+        const tokenInput = document.getElementById("token");
+        const output = document.getElementById("output");
+
+        tokenInput.value = localStorage.getItem(tokenKey) || "";
+
+        function appendLog(title, payload) {
+            const time = new Date().toLocaleTimeString();
+            const body = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+            output.textContent = "[" + time + "] " + title + "\n" + body + "\n\n" + output.textContent;
+        }
+
+        async function apiRequest(url, options = {}) {
+            const token = tokenInput.value.trim();
+            const headers = new Headers(options.headers || {});
+            if (token) {
+                headers.set("authorization", token);
+            }
+            if (options.body && !headers.has("Content-Type")) {
+                headers.set("Content-Type", "application/json");
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+
+            const text = await response.text();
+            let payload = text;
+            try {
+                payload = JSON.parse(text);
+            } catch (error) {
+                // Keep plain text payload.
+            }
+
+            return {
+                ok: response.ok,
+                status: response.status,
+                payload
+            };
+        }
+
+        function buildCodeUrl() {
+            const mode = modeInput.value;
+            const identifier = identifierInput.value.trim();
+            if (mode === "phone") {
+                return "/user/code?phone=" + encodeURIComponent(identifier);
+            }
+            return "/user/code/email?email=" + encodeURIComponent(identifier);
+        }
+
+        function buildLoginBody() {
+            const mode = modeInput.value;
+            const identifier = identifierInput.value.trim();
+            const code = codeInput.value.trim();
+            return mode === "phone"
+                ? { phone: identifier, code }
+                : { email: identifier, code };
+        }
+
+        document.getElementById("send-code").addEventListener("click", async () => {
+            const result = await apiRequest(buildCodeUrl(), { method: "POST" });
+            appendLog("Send verification code", result);
+        });
+
+        document.getElementById("login").addEventListener("click", async () => {
+            const result = await apiRequest("/user/login", {
+                method: "POST",
+                body: JSON.stringify(buildLoginBody())
+            });
+            if (result.ok && result.payload && result.payload.data) {
+                tokenInput.value = result.payload.data;
+                localStorage.setItem(tokenKey, result.payload.data);
+            }
+            appendLog("Login", result);
+        });
+
+        document.getElementById("save-token").addEventListener("click", () => {
+            localStorage.setItem(tokenKey, tokenInput.value.trim());
+            appendLog("Save token manually", { saved: true });
+        });
+
+        document.getElementById("ttl-before").addEventListener("click", async () => {
+            const result = await apiRequest("/user/token/ttl");
+            appendLog("Current TTL", result);
+        });
+
+        document.getElementById("refresh-root").addEventListener("click", async () => {
+            const result = await apiRequest("/");
+            appendLog("Call / with token", result);
+        });
+
+        document.getElementById("ttl-after").addEventListener("click", async () => {
+            const result = await apiRequest("/user/token/ttl");
+            appendLog("TTL after refresh", result);
+        });
+
+        document.getElementById("me").addEventListener("click", async () => {
+            const result = await apiRequest("/user/me");
+            appendLog("Call /user/me", result);
+        });
+    </script>
+</body>
+</html>

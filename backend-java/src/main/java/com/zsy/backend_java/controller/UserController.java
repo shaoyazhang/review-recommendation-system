@@ -1,9 +1,12 @@
 package com.zsy.backend_java.controller;
 
+import static com.zsy.backend_java.util.RedisConstants.LOGIN_USER_KEY;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.zsy.backend_java.dto.LoginFormDTO;
 import com.zsy.backend_java.dto.Result;
@@ -13,6 +16,7 @@ import com.zsy.backend_java.util.UserHolder;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class UserController {
     @Resource
     private IUserService userService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     // @Resource
     // private IUserInfoService userInfoService;
@@ -57,6 +63,16 @@ public class UserController {
     public Result me() {
         UserDTO user = UserHolder.getUser();
         return Result.ok(user);
+    }
+
+    @GetMapping("/token/ttl")
+    public Result tokenTtl(HttpServletRequest request) {
+        String token = request.getHeader("authorization");
+        if (token == null || token.isBlank()) {
+            return Result.fail("Missing authorization token");
+        }
+        Long ttl = stringRedisTemplate.getExpire(LOGIN_USER_KEY + token);
+        return Result.ok(ttl);
     }
     
 }
