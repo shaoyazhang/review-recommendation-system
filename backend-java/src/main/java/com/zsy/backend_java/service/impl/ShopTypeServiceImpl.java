@@ -1,6 +1,7 @@
 package com.zsy.backend_java.service.impl;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsy.backend_java.dto.Result;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import jakarta.annotation.Resource;
 
+@Service
 public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> implements IShopeTypeService{
 
     @Resource
@@ -54,4 +56,6 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
         stringRedisTemplate.opsForList().rightPushAll(typeKey, typeJsonList);
         return Result.ok(shopTypeList);
     }
+
+    
 }
